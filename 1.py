@@ -67,6 +67,9 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     this function with the weighted_img() function below
     """
     def remove_outliers(l):
+        if len(l) < 3:
+          return l == l
+
         med = stat.median(l)
         dev = stat.stdev(l)
 
@@ -115,15 +118,22 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     positive = slopes > 0
     rlines = lines[positive]
     rslopes = slopes[positive]
-    rlines = rlines[remove_outliers(rslopes)]
     llines = lines[~positive]
     lslopes = slopes[~positive]
-    llines = llines[remove_outliers(lslopes)]
 
-    rline = average_line(rlines)
-    lline = average_line(llines)
+    lines = []
 
-    lines = np.array([rline, lline])
+    if len(rslopes):
+        rlines = rlines[remove_outliers(rslopes)]
+        rline = average_line(rlines)
+        lines.append(rline)
+
+    if len(lslopes):
+        llines = llines[remove_outliers(lslopes)]
+        lline = average_line(llines)
+        lines.append(lline)
+
+    lines = np.array(lines)
 
     for line in lines:
         for x1,y1,x2,y2 in line:
