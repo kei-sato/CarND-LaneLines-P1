@@ -106,6 +106,11 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
 
     slopes = np.array([[(y2-y1) / (x2-x1) if x2-x1 != 0 else 1e+100 for x1,y1,x2,y2 in line] for line in lines])
     slopes = slopes.flatten()
+
+    notflat = np.abs(slopes) > 0.3
+    lines = lines[notflat]
+    slopes = slopes[notflat]
+
     positive = slopes > 0
     rights = lines[positive]
     right_slopes = slopes[positive]
