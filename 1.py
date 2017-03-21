@@ -112,17 +112,17 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     slopes = slopes[notflat]
 
     positive = slopes > 0
-    rights = lines[positive]
-    right_slopes = slopes[positive]
-    rights = rights[remove_outliers(right_slopes)]
-    lefts = lines[~positive]
-    left_slopes = slopes[~positive]
-    lefts = lefts[remove_outliers(left_slopes)]
+    rlines = lines[positive]
+    rslopes = slopes[positive]
+    rlines = rlines[remove_outliers(rslopes)]
+    llines = lines[~positive]
+    lslopes = slopes[~positive]
+    llines = llines[remove_outliers(lslopes)]
 
-    right_line = average_line(rights)
-    left_line = average_line(lefts)
+    rline = average_line(rlines)
+    lline = average_line(llines)
 
-    lines = np.array([right_line, left_line])
+    lines = np.array([rline, lline])
 
     for line in lines:
         for x1,y1,x2,y2 in line:
