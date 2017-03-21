@@ -68,9 +68,10 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     """
     def remove_outliers(l):
         med = stat.median(l)
+        dev = stat.stdev(l)
 
         # remove outliers
-        return (l > med - 5) & (l < med + 5)
+        return (l > med - dev*3) & (l < med + dev*3)
 
     def average_line(l):
         x = [[[x1, x2] for x1,y1,x2,y2 in line] for line in l]
