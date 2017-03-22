@@ -6,6 +6,14 @@ import math
 import statistics as stat
 from sklearn import datasets, linear_model
 
+class Global():
+    def __init__(this):
+        this.rpre = None
+        this.lpre = None
+
+_glb = Global()
+
+
 def grayscale(img):
     """Applies the Grayscale transform
     This will return an image with only one color channel
@@ -91,18 +99,27 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
         slope = regr.coef_
         inter = regr.intercept_
 
+        # get previous slope and intercept
+        pre = _glb.rpre if slope > 0 else _glb.lpre
+
+        if pre:
+            # update with momentum
+            slope = pre['slope'] * 0.8 + slope * 0.2
+            inter = pre['inter'] * 0.8 + inter * 0.2
+
+        # updated values
+        updated = { 'slope': slope, 'inter': inter }
+
+        # save updated values
         if slope > 0:
-            # right line
-            x1 = x.min()
-            y1 = x1 * slope + inter
-            y2 = img.shape[1]
-            x2 = (y2 - inter) / slope
+            _glb.rpre = updated
         else:
-            # left line
-            y1 = img.shape[1]
-            x1 = (y1 - inter) / slope
-            x2 = x.max()
-            y2 = x2 * slope + inter
+            _glb.lpre = updated
+
+        y1 = y.min()
+        x1 = (y1 - inter) / slope
+        y2 = img.shape[1]
+        x2 = (y2 - inter) / slope
 
         result = np.array([[x1,y1,x2,y2]], dtype=int)
 
@@ -114,6 +131,20 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     notflat = np.abs(slopes) > 0.3
     lines = lines[notflat]
     slopes = slopes[notflat]
+
+    # closepre = slopes == slopes
+
+    # if _glb.rpre and _glb.lpre:
+    #     rs = _glb.rpre['slope']
+    #     ls = _glb.lpre['slope']
+    #     rclose = (slopes < rs * 1.25) & (slopes > rs * 0.8)
+    #     lclose = (slopes > ls * 1.25) & (slopes < ls * 0.8)
+    #     closepre = closepre & (rclose | lclose)
+    #     # stochastic adoption
+    #     closepre = closepre | (np.random.rand(len(closepre)) < 0.1)
+
+    # lines = lines[closepre]
+    # slopes = slopes[closepre]
 
     positive = slopes > 0
     rlines = lines[positive]
@@ -195,6 +226,8 @@ def convert(fname):
     threshold = 15     # minimum number of votes (intersections in Hough grid cell)
     min_line_length = 40 # minimum number of pixels making up a line
     max_line_gap = 20    # maximum gap in pixels between connectable line segments
+
+    _glb = Global()
 
     gray = grayscale(image)
     if saveimage:
